@@ -14,6 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""
+Module phrasefinder provides routines for querying the PhraseFinder web service
+at http://phrasefinder.io.
+"""
+
 try:
     # Python 2.
     import urllib as urllibx
@@ -22,6 +27,11 @@ except ImportError:
     import urllib.request as urllibx
 
 class Corpus(object):
+    """
+    Corpus contains numeric constants that represent corpora to be searched.
+    All corpora belong to version 2 of the Google Books Ngram Dataset
+    (http://storage.googleapis.com/books/ngrams/books/datasetsv2.html).
+    """
     EnglishUS, EnglishGB, Spanish, French, German, Russian, Chinese = range(7)
     _to_string = {
         EnglishUS: "eng-us",
@@ -30,10 +40,16 @@ class Corpus(object):
         French:    "fre",
         German:    "ger",
         Russian:   "rus",
-        Chinese:   "chi"
+        Chinese:   "chi"  # Simplyfied Chinese
     }
 
 class Status(object):
+    """
+    Status contains numeric constants that report whether a request was
+    successful or not. The value is derived from the HTTP status code sent along
+    with a response. Note that the numeric value does not correspond to the
+    original HTTP code.
+    """
     Ok, BadRequest, PaymentRequired, MethodNotAllowed, TooManyRequests, ServerError = range(6)
     _from_http_response_code = {
         200: Ok,
@@ -45,23 +61,37 @@ class Status(object):
     }
 
 class Token(object):
+    """
+    Token represents a single token (word, punctuation mark, etc.) as part of a
+    phrase.
+    """
     class Tag(object):
+        """
+        Tag denotes the role of a token with respect to the query.
+        """
         Given, Inserted, Alternative, Completed = range(4)
     def __init__(self):
         self.text = ""
         self.tag  = Token.Tag.Given
 
 class Phrase(object):
+    """
+    Phrase represents a phrase, also called n-gram.
+    A phrase consists of a sequence of tokens and metadata.
+    """
     def __init__(self):
-        self.tokens       = []  # List of Phrase.Token instances.
-        self.match_count  = 0
-        self.volume_count = 0
-        self.first_year   = 0
-        self.last_year    = 0
-        self.relative_id  = 0
-        self.score        = 0.0
+        self.tokens       = []   # The tokens of the phrase.
+        self.match_count  = 0    # The absolute frequency in the corpus.
+        self.volume_count = 0    # The number of books it appears in.
+        self.first_year   = 0    # Publication date of the first book it appears in.
+        self.last_year    = 0    # Publication date of the last book it appears in.
+        self.relative_id  = 0    # See the API documentation on the website.
+        self.score        = 0.0  # The relative frequency it matched the given query.
 
 class Options(object):
+    """
+    Options represents optional parameters that can be sent along with a query.
+    """
     def __init__(self):
         self.corpus = Corpus.EnglishUS
         self.nmin   = 1
@@ -70,12 +100,24 @@ class Options(object):
         self.key    = ""
 
 class Result(object):
+    """
+    Result represents a search result.
+    """
     def __init__(self):
         self.status  = Status.Ok
         self.phrases = []  # List of Phrase instances.
         self.quota   = 0
 
 def search(query, options = Options()):
+    """
+    Search sends a request to the server.
+    The second argument can be nil to go with default parameters.
+    It returns a Result object whose status field is equal to StatusOk if the
+    request was successful. In this case other fields of the object are in valid
+    state and can be read. Any status other than StatusOk indicates a failed
+    request. In that case other fields in the result have unspecified data.
+    Critical errors are reported via err that is not nil.
+    """
     file = urllibx.urlopen(_to_url(query, options))
     result = Result()
     result.status = Status._from_http_response_code[file.getcode()]
