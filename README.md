@@ -41,13 +41,15 @@ if __name__ == '__main__':
     main()
 ```
 
-### Run
+## Clone and run
 
 ```sh
-python ./src/demo.py
+git clone https://github.com/mtrenkmann/phrasefinder-client-python.git
+cd phrasefinder-client-python
+python src/demo.py
 ```
 
-### Output
+## Output
 
 ```
 0.175468 I_0 like_0 to_1 think_1 of_1
@@ -66,4 +68,3 @@ Remaining quota: 99
 ## Installation
 
 Copy the file `src/phrasefinder.py` into the source directory of your project.
-
