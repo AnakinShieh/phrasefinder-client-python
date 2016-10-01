@@ -2,6 +2,8 @@
 
 The official Python client for the [PhraseFinder](http://phrasefinder.io) web service
 
+* [Documentation](https://mtrenkmann.github.io/phrasefinder-client-python/)
+
 ## Demo
 
 ```python
