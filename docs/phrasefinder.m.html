@@ -970,6 +970,13 @@ table {
   <div id="sidebar">
     <h1>Index</h1>
     <ul id="index">
+    <li class="set"><h3><a href="#header-variables">Module variables</a></h3>
+      
+  <ul>
+    <li class="mono"><a href="#phrasefinder.version">version</a></li>
+  </ul>
+
+    </li>
 
     <li class="set"><h3><a href="#header-functions">Functions</a></h3>
       
@@ -1072,6 +1079,9 @@ try:
 except ImportError:
     # Python 3.
     import urllib.request as urllibx
+
+version = 1000 # major * 10^6 + minor * 10^3 + micro
+"""Defines the version number as one integer."""
 
 class Corpus(object):
     """
@@ -1207,12 +1217,22 @@ def _to_url(query, options):
   </header>
 
   <section id="section-items">
+    <h2 class="section-title" id="header-variables">Module variables</h2>
+      <div class="item">
+      <p id="phrasefinder.version" class="name">var <span class="ident">version</span></p>
+      
+  
+    <div class="desc"><p>Defines the version number as one integer.</p></div>
+  <div class="source_cont">
+</div>
+
+      </div>
 
     <h2 class="section-title" id="header-functions">Functions</h2>
       
   <div class="item">
     <div class="name def" id="phrasefinder.search">
-    <p>def <span class="ident">search</span>(</p><p>query, options=&lt;__pdoc_file_module__.Options object at 0x7f38a4f1dd10&gt;)</p>
+    <p>def <span class="ident">search</span>(</p><p>query, options=&lt;__pdoc_file_module__.Options object at 0x7f65d20c8cd0&gt;)</p>
     </div>
     
 
