@@ -26,6 +26,9 @@ except ImportError:
     # Python 3.
     import urllib.request as urllibx
 
+version = 1000 # major * 10^6 + minor * 10^3 + micro
+"""Defines the version number as one integer."""
+
 class Corpus(object):
     """
     Corpus contains numeric constants that represent corpora to be searched.
