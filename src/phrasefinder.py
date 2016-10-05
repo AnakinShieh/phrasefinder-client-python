@@ -113,7 +113,7 @@ class Result(object):
         self.phrases = []  # List of Phrase instances.
         self.quota   = 0
 
-def search(query, options = Options()):
+def search(query, options=Options()):
     """
     Search sends a request to the server.
     The second argument can be nil to go with default parameters.
@@ -123,12 +123,12 @@ def search(query, options = Options()):
     request. In that case other fields in the result have unspecified data.
     Critical errors are reported via err that is not nil.
     """
-    file = urllibx.urlopen(_to_url(query, options))
+    context = urllibx.urlopen(_to_url(query, options))
     result = Result()
-    result.status = Status._from_http_response_code[file.getcode()]
+    result.status = Status._from_http_response_code[context.getcode()]
     if result.status == Status.Ok:
-        result.quota = int(file.info()["X-Quota"])
-        for line in file.readlines():
+        result.quota = int(context.info()["X-Quota"])
+        for line in context.readlines():
             line = line.decode('utf-8')
             phrase = Phrase()
             parts = line.split("\t")
@@ -144,7 +144,7 @@ def search(query, options = Options()):
             phrase.relative_id  = int(parts[5])
             phrase.score        = float(parts[6])
             result.phrases.append(phrase)
-    file.close()
+    context.close()
     return result
 
 def _to_url(query, options):
