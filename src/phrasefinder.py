@@ -18,13 +18,15 @@
 Module phrasefinder provides routines for querying the PhraseFinder web service
 at http://phrasefinder.io.
 """
-
-try:
+import sys
+if sys.version_info[0] < 3:
     # Python 2.
     import urllib as urllibx
-except ImportError:
+    from urllib import urlencode as urlencode
+else:
     # Python 3.
     import urllib.request as urllibx
+    from urllib.parse import urlencode as urlencode
 
 version = 1000 # major * 10^6 + minor * 10^3 + micro
 """Defines the version number as one integer."""
@@ -127,6 +129,8 @@ def search(query, options = Options()):
     if result.status == Status.Ok:
         result.quota = int(file.info()["X-Quota"])
         for line in file.readlines():
+            line = line.decode('utf-8')
+            print(line)
             phrase = Phrase()
             parts = line.split("\t")
             for token_with_tag in parts[0].split(" "):
@@ -155,5 +159,5 @@ def _to_url(query, options):
     ]
     if options.key:
         params.append(("key", options.key))
-    return "http://phrasefinder.io/search?" + urllibx.urlencode(params)
+    return "http://phrasefinder.io/search?" + urlencode(params)
 
