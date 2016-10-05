@@ -47,19 +47,10 @@ class Status(object):
     original HTTP code.
     """
     Ok, BadRequest, PaymentRequired, MethodNotAllowed, TooManyRequests, ServerError = range(6)
-    _from_http_response_code = {
-        200: Ok,
-        400: BadRequest,
-        402: PaymentRequired,
-        405: MethodNotAllowed,
-        429: TooManyRequests,
-        500: ServerError
-    }
 
 class Token(object):
     """
-    Token represents a single token (word, punctuation mark, etc.) as part of a
-    phrase.
+    Token represents a single token (word, punctuation mark, etc.) as part of a phrase.
     """
     class Tag(object):
         """
@@ -114,9 +105,17 @@ def search(query, options=Options()):
     request. In that case other fields in the result have unspecified data.
     Critical errors are reported via err that is not nil.
     """
-    context = urllibx.urlopen(_to_url(query, options))
+    http_response_code_to_status = {
+        200: Status.Ok,
+        400: Status.BadRequest,
+        402: Status.PaymentRequired,
+        405: Status.MethodNotAllowed,
+        429: Status.TooManyRequests,
+        500: Status.ServerError
+    }
     result = Result()
-    result.status = Status._from_http_response_code[context.getcode()]
+    context = urllibx.urlopen(_to_url(query, options))
+    result.status = http_response_code_to_status[context.getcode()]
     if result.status == Status.Ok:
         result.quota = int(context.info()["X-Quota"])
         for line in context.readlines():
