@@ -7,6 +7,7 @@ The official Python client for the [PhraseFinder](http://phrasefinder.io) web se
 ## Demo
 
 ```python
+from __future__ import print_function
 import phrasefinder
 
 def main():
@@ -22,19 +23,19 @@ def main():
     try:
         result = phrasefinder.search(query, options)
         if result.status != phrasefinder.Status.Ok:
-            print 'Request was not successful: %d' % result.status
+            print('Request was not successful: {}'.format(result.status))
             return
 
         # Print phrases line by line.
         for phrase in result.phrases:
-            print '%6f' % phrase.score,
+            print("{0:6f}".format(phrase.score), end="")
             for token in phrase.tokens:
-                print '%s_%d' % (token.text, token.tag),
-            print
-        print 'Remaining quota: %d' % result.quota
+                print(' {}_{}'.format(token.text, token.tag), end="")
+            print()
+        print('Remaining quota: {}'.format(result.quota))
 
-    except Exception, e:
-        print 'Some error occurred: %s' % e
+    except Exception as error:
+        print('Some error occurred: {}'.format(error))
 
 
 if __name__ == '__main__':
