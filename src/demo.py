@@ -23,7 +23,7 @@ def main():
         for phrase in result.phrases:
             print("{0:6f}".format(phrase.score), end="")
             for token in phrase.tokens:
-                print('{}_{}'.format(token.text, token.tag), end="")
+                print('{}_{}'.format(token.text, token.tag), end=" ")
             print()
         print('Remaining quota: {}'.format(result.quota))
 
