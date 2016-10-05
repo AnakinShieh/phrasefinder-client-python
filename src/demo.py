@@ -27,8 +27,8 @@ def main():
             print()
         print('Remaining quota: {}'.format(result.quota))
 
-    except Exception as e:
-        print('Some error occurred: {}'.format(e))
+    except Exception as error:
+        print('Some error occurred: {}'.format(error))
 
 
 if __name__ == '__main__':
