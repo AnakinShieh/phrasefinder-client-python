@@ -4,8 +4,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 
     <title>phrasefinder API documentation</title>
-    <meta name="description" content="Module phrasefinder provides routines for querying the PhraseFinder web service
-at http://phrasefind..." />
+    <meta name="description" content="Module phrasefinder provides routines for querying the PhraseFinder web service at
+http://phrasefind..." />
 
   <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300' rel='stylesheet' type='text/css'>
   
@@ -973,7 +973,7 @@ table {
     <li class="set"><h3><a href="#header-variables">Module variables</a></h3>
       
   <ul>
-    <li class="mono"><a href="#phrasefinder.version">version</a></li>
+    <li class="mono"><a href="#phrasefinder.VERSION">VERSION</a></li>
   </ul>
 
     </li>
@@ -1047,8 +1047,8 @@ table {
 
   <header id="section-intro">
   <h1 class="title"><span class="name">phrasefinder</span> module</h1>
-  <p>Module phrasefinder provides routines for querying the PhraseFinder web service
-at http://phrasefinder.io.</p>
+  <p>Module phrasefinder provides routines for querying the PhraseFinder web service at
+http://phrasefinder.io.</p>
   
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-phrasefinder', this);">Show source &equiv;</a></p>
   <div id="source-phrasefinder" class="source">
@@ -1069,71 +1069,50 @@ at http://phrasefinder.io.</p>
 # limitations under the License.
 
 """
-Module phrasefinder provides routines for querying the PhraseFinder web service
-at http://phrasefinder.io.
+Module phrasefinder provides routines for querying the PhraseFinder web service at
+http://phrasefinder.io.
 """
-
-try:
+import sys
+if sys.version_info[0] < 3:
     # Python 2.
     import urllib as urllibx
-except ImportError:
+    from urllib import urlencode as urlencode
+else:
     # Python 3.
     import urllib.request as urllibx
+    from urllib.parse import urlencode as urlencode
 
-version = 1000 # major * 10^6 + minor * 10^3 + micro
+VERSION = 1000 # major * 10^6 + minor * 10^3 + micro
 """Defines the version number as one integer."""
 
 class Corpus(object):
-    """
-    Corpus contains numeric constants that represent corpora to be searched.
+    """Corpus contains numeric constants that represent corpora to be searched.
+    
     All corpora belong to version 2 of the Google Books Ngram Dataset
     (http://storage.googleapis.com/books/ngrams/books/datasetsv2.html).
     """
     EnglishUS, EnglishGB, Spanish, French, German, Russian, Chinese = range(7)
-    _to_string = {
-        EnglishUS: "eng-us",
-        EnglishGB: "eng-gb",
-        Spanish:   "spa",
-        French:    "fre",
-        German:    "ger",
-        Russian:   "rus",
-        Chinese:   "chi"  # Simplyfied Chinese
-    }
 
 class Status(object):
-    """
-    Status contains numeric constants that report whether a request was
-    successful or not. The value is derived from the HTTP status code sent along
-    with a response. Note that the numeric value does not correspond to the
-    original HTTP code.
+    """Status contains numeric constants that report whether a request was successful.
+
+    The value is derived from the HTTP status code sent along with a response. Note that the numeric
+    value does not correspond to the original HTTP code.
     """
     Ok, BadRequest, PaymentRequired, MethodNotAllowed, TooManyRequests, ServerError = range(6)
-    _from_http_response_code = {
-        200: Ok,
-        400: BadRequest,
-        402: PaymentRequired,
-        405: MethodNotAllowed,
-        429: TooManyRequests,
-        500: ServerError
-    }
 
 class Token(object):
-    """
-    Token represents a single token (word, punctuation mark, etc.) as part of a
-    phrase.
-    """
+    """Token represents a single token (word, punctuation mark, etc.) as part of a phrase."""
     class Tag(object):
-        """
-        Tag denotes the role of a token with respect to the query.
-        """
+        """Tag denotes the role of a token with respect to the query."""
         Given, Inserted, Alternative, Completed = range(4)
     def __init__(self):
         self.text = ""
         self.tag  = Token.Tag.Given
 
 class Phrase(object):
-    """
-    Phrase represents a phrase, also called n-gram.
+    """Phrase represents a phrase, also called n-gram.
+    
     A phrase consists of a sequence of tokens and metadata.
     """
     def __init__(self):
@@ -1146,9 +1125,7 @@ class Phrase(object):
         self.score        = 0.0  # The relative frequency it matched the given query.
 
 class Options(object):
-    """
-    Options represents optional parameters that can be sent along with a query.
-    """
+    """Options represents optional parameters that can be sent along with a query."""
     def __init__(self):
         self.corpus = Corpus.EnglishUS
         self.nmin   = 1
@@ -1157,30 +1134,36 @@ class Options(object):
         self.key    = ""
 
 class Result(object):
-    """
-    Result represents a search result.
-    """
+    """Result represents a search result."""
     def __init__(self):
         self.status  = Status.Ok
         self.phrases = []  # List of Phrase instances.
         self.quota   = 0
 
-def search(query, options = Options()):
+def search(query, options=Options()):
+    """Search sends a request to the server.
+    
+    Returns:
+      An Result object whose status attribute is equal to Status.Ok if the request was successful.
+      In this case other attributes of the object have valid data and can be read. Any status other
+      than Status.Ok indicates a failed request. In that case other attributes in the result have
+      unspecified data. Critical errors are reported throwing an exception.
     """
-    Search sends a request to the server.
-    The second argument can be nil to go with default parameters.
-    It returns a Result object whose status field is equal to StatusOk if the
-    request was successful. In this case other fields of the object are in valid
-    state and can be read. Any status other than StatusOk indicates a failed
-    request. In that case other fields in the result have unspecified data.
-    Critical errors are reported via err that is not nil.
-    """
-    file = urllibx.urlopen(_to_url(query, options))
+    http_response_code_to_status = {
+        200: Status.Ok,
+        400: Status.BadRequest,
+        402: Status.PaymentRequired,
+        405: Status.MethodNotAllowed,
+        429: Status.TooManyRequests,
+        500: Status.ServerError
+    }
     result = Result()
-    result.status = Status._from_http_response_code[file.getcode()]
+    context = urllibx.urlopen(_to_url(query, options))
+    result.status = http_response_code_to_status[context.getcode()]
     if result.status == Status.Ok:
-        result.quota = int(file.info()["X-Quota"])
-        for line in file.readlines():
+        result.quota = int(context.info()["X-Quota"])
+        for line in context.readlines():
+            line = line.decode('utf-8')
             phrase = Phrase()
             parts = line.split("\t")
             for token_with_tag in parts[0].split(" "):
@@ -1195,21 +1178,30 @@ def search(query, options = Options()):
             phrase.relative_id  = int(parts[5])
             phrase.score        = float(parts[6])
             result.phrases.append(phrase)
-    file.close()
+    context.close()
     return result
 
 def _to_url(query, options):
+    corpus_to_string = {
+        Corpus.EnglishUS: "eng-us",
+        Corpus.EnglishGB: "eng-gb",
+        Corpus.Spanish:   "spa",
+        Corpus.French:    "fre",
+        Corpus.German:    "ger",
+        Corpus.Russian:   "rus",
+        Corpus.Chinese:   "chi"  # Simplyfied Chinese
+    }
     params = [
         ("format", "tsv"),
         ("query", query),
-        ("corpus", Corpus._to_string[options.corpus]),
+        ("corpus", corpus_to_string[options.corpus]),
         ("nmin", options.nmin),
         ("nmax", options.nmax),
         ("topk", options.topk)
     ]
     if options.key:
         params.append(("key", options.key))
-    return "http://phrasefinder.io/search?" + urllibx.urlencode(params)
+    return "http://phrasefinder.io/search?" + urlencode(params)
 
 </code></pre>
   </div>
@@ -1219,7 +1211,7 @@ def _to_url(query, options):
   <section id="section-items">
     <h2 class="section-title" id="header-variables">Module variables</h2>
       <div class="item">
-      <p id="phrasefinder.version" class="name">var <span class="ident">version</span></p>
+      <p id="phrasefinder.VERSION" class="name">var <span class="ident">VERSION</span></p>
       
   
     <div class="desc"><p>Defines the version number as one integer.</p></div>
@@ -1232,38 +1224,45 @@ def _to_url(query, options):
       
   <div class="item">
     <div class="name def" id="phrasefinder.search">
-    <p>def <span class="ident">search</span>(</p><p>query, options=&lt;__pdoc_file_module__.Options object at 0x7f65d20c8cd0&gt;)</p>
+    <p>def <span class="ident">search</span>(</p><p>query, options=&lt;__pdoc_file_module__.Options object at 0x7ff167a385d0&gt;)</p>
     </div>
     
 
     
   
-    <div class="desc"><p>Search sends a request to the server.
-The second argument can be nil to go with default parameters.
-It returns a Result object whose status field is equal to StatusOk if the
-request was successful. In this case other fields of the object are in valid
-state and can be read. Any status other than StatusOk indicates a failed
-request. In that case other fields in the result have unspecified data.
-Critical errors are reported via err that is not nil.</p></div>
+    <div class="desc"><p>Search sends a request to the server.</p>
+<p>Returns:
+  An Result object whose status attribute is equal to Status.Ok if the request was successful.
+  In this case other attributes of the object have valid data and can be read. Any status other
+  than Status.Ok indicates a failed request. In that case other attributes in the result have
+  unspecified data. Critical errors are reported throwing an exception.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-phrasefinder.search', this);">Show source &equiv;</a></p>
   <div id="source-phrasefinder.search" class="source">
-    <pre><code>def search(query, options = Options()):
+    <pre><code>def search(query, options=Options()):
+    """Search sends a request to the server.
+    
+    Returns:
+      An Result object whose status attribute is equal to Status.Ok if the request was successful.
+      In this case other attributes of the object have valid data and can be read. Any status other
+      than Status.Ok indicates a failed request. In that case other attributes in the result have
+      unspecified data. Critical errors are reported throwing an exception.
     """
-    Search sends a request to the server.
-    The second argument can be nil to go with default parameters.
-    It returns a Result object whose status field is equal to StatusOk if the
-    request was successful. In this case other fields of the object are in valid
-    state and can be read. Any status other than StatusOk indicates a failed
-    request. In that case other fields in the result have unspecified data.
-    Critical errors are reported via err that is not nil.
-    """
-    file = urllibx.urlopen(_to_url(query, options))
+    http_response_code_to_status = {
+        200: Status.Ok,
+        400: Status.BadRequest,
+        402: Status.PaymentRequired,
+        405: Status.MethodNotAllowed,
+        429: Status.TooManyRequests,
+        500: Status.ServerError
+    }
     result = Result()
-    result.status = Status._from_http_response_code[file.getcode()]
+    context = urllibx.urlopen(_to_url(query, options))
+    result.status = http_response_code_to_status[context.getcode()]
     if result.status == Status.Ok:
-        result.quota = int(file.info()["X-Quota"])
-        for line in file.readlines():
+        result.quota = int(context.info()["X-Quota"])
+        for line in context.readlines():
+            line = line.decode('utf-8')
             phrase = Phrase()
             parts = line.split("\t")
             for token_with_tag in parts[0].split(" "):
@@ -1278,7 +1277,7 @@ Critical errors are reported via err that is not nil.</p></div>
             phrase.relative_id  = int(parts[5])
             phrase.score        = float(parts[6])
             result.phrases.append(phrase)
-    file.close()
+    context.close()
     return result
 </code></pre>
   </div>
@@ -1293,28 +1292,19 @@ Critical errors are reported via err that is not nil.</p></div>
       <p id="phrasefinder.Corpus" class="name">class <span class="ident">Corpus</span></p>
       
   
-    <div class="desc"><p>Corpus contains numeric constants that represent corpora to be searched.
-All corpora belong to version 2 of the Google Books Ngram Dataset
+    <div class="desc"><p>Corpus contains numeric constants that represent corpora to be searched.</p>
+<p>All corpora belong to version 2 of the Google Books Ngram Dataset
 (http://storage.googleapis.com/books/ngrams/books/datasetsv2.html).</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-phrasefinder.Corpus', this);">Show source &equiv;</a></p>
   <div id="source-phrasefinder.Corpus" class="source">
     <pre><code>class Corpus(object):
-    """
-    Corpus contains numeric constants that represent corpora to be searched.
+    """Corpus contains numeric constants that represent corpora to be searched.
+    
     All corpora belong to version 2 of the Google Books Ngram Dataset
     (http://storage.googleapis.com/books/ngrams/books/datasetsv2.html).
     """
     EnglishUS, EnglishGB, Spanish, French, German, Russian, Chinese = range(7)
-    _to_string = {
-        EnglishUS: "eng-us",
-        EnglishGB: "eng-gb",
-        Spanish:   "spa",
-        French:    "fre",
-        German:    "ger",
-        Russian:   "rus",
-        Chinese:   "chi"  # Simplyfied Chinese
-    }
 </code></pre>
   </div>
 </div>
@@ -1409,9 +1399,7 @@ All corpora belong to version 2 of the Google Books Ngram Dataset
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-phrasefinder.Options', this);">Show source &equiv;</a></p>
   <div id="source-phrasefinder.Options" class="source">
     <pre><code>class Options(object):
-    """
-    Options represents optional parameters that can be sent along with a query.
-    """
+    """Options represents optional parameters that can be sent along with a query."""
     def __init__(self):
         self.corpus = Corpus.EnglishUS
         self.nmin   = 1
@@ -1512,14 +1500,14 @@ All corpora belong to version 2 of the Google Books Ngram Dataset
       <p id="phrasefinder.Phrase" class="name">class <span class="ident">Phrase</span></p>
       
   
-    <div class="desc"><p>Phrase represents a phrase, also called n-gram.
-A phrase consists of a sequence of tokens and metadata.</p></div>
+    <div class="desc"><p>Phrase represents a phrase, also called n-gram.</p>
+<p>A phrase consists of a sequence of tokens and metadata.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-phrasefinder.Phrase', this);">Show source &equiv;</a></p>
   <div id="source-phrasefinder.Phrase" class="source">
     <pre><code>class Phrase(object):
-    """
-    Phrase represents a phrase, also called n-gram.
+    """Phrase represents a phrase, also called n-gram.
+    
     A phrase consists of a sequence of tokens and metadata.
     """
     def __init__(self):
@@ -1651,9 +1639,7 @@ A phrase consists of a sequence of tokens and metadata.</p></div>
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-phrasefinder.Result', this);">Show source &equiv;</a></p>
   <div id="source-phrasefinder.Result" class="source">
     <pre><code>class Result(object):
-    """
-    Result represents a search result.
-    """
+    """Result represents a search result."""
     def __init__(self):
         self.status  = Status.Ok
         self.phrases = []  # List of Phrase instances.
@@ -1730,29 +1716,19 @@ A phrase consists of a sequence of tokens and metadata.</p></div>
       <p id="phrasefinder.Status" class="name">class <span class="ident">Status</span></p>
       
   
-    <div class="desc"><p>Status contains numeric constants that report whether a request was
-successful or not. The value is derived from the HTTP status code sent along
-with a response. Note that the numeric value does not correspond to the
-original HTTP code.</p></div>
+    <div class="desc"><p>Status contains numeric constants that report whether a request was successful.</p>
+<p>The value is derived from the HTTP status code sent along with a response. Note that the numeric
+value does not correspond to the original HTTP code.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-phrasefinder.Status', this);">Show source &equiv;</a></p>
   <div id="source-phrasefinder.Status" class="source">
     <pre><code>class Status(object):
-    """
-    Status contains numeric constants that report whether a request was
-    successful or not. The value is derived from the HTTP status code sent along
-    with a response. Note that the numeric value does not correspond to the
-    original HTTP code.
+    """Status contains numeric constants that report whether a request was successful.
+
+    The value is derived from the HTTP status code sent along with a response. Note that the numeric
+    value does not correspond to the original HTTP code.
     """
     Ok, BadRequest, PaymentRequired, MethodNotAllowed, TooManyRequests, ServerError = range(6)
-    _from_http_response_code = {
-        200: Ok,
-        400: BadRequest,
-        402: PaymentRequired,
-        405: MethodNotAllowed,
-        429: TooManyRequests,
-        500: ServerError
-    }
 </code></pre>
   </div>
 </div>
@@ -1832,20 +1808,14 @@ original HTTP code.</p></div>
       <p id="phrasefinder.Token" class="name">class <span class="ident">Token</span></p>
       
   
-    <div class="desc"><p>Token represents a single token (word, punctuation mark, etc.) as part of a
-phrase.</p></div>
+    <div class="desc"><p>Token represents a single token (word, punctuation mark, etc.) as part of a phrase.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-phrasefinder.Token', this);">Show source &equiv;</a></p>
   <div id="source-phrasefinder.Token" class="source">
     <pre><code>class Token(object):
-    """
-    Token represents a single token (word, punctuation mark, etc.) as part of a
-    phrase.
-    """
+    """Token represents a single token (word, punctuation mark, etc.) as part of a phrase."""
     class Tag(object):
-        """
-        Tag denotes the role of a token with respect to the query.
-        """
+        """Tag denotes the role of a token with respect to the query."""
         Given, Inserted, Alternative, Completed = range(4)
     def __init__(self):
         self.text = ""
