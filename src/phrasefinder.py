@@ -19,7 +19,7 @@ Module phrasefinder provides routines for querying the PhraseFinder web service
 at http://phrasefinder.io.
 """
 import sys
-if sys.version_info[0] < 3:
+if sys.version_info[0] < 3:  # this check is correct
     # Python 2.
     import urllib as urllibx
     from urllib import urlencode as urlencode
@@ -129,8 +129,7 @@ def search(query, options = Options()):
     if result.status == Status.Ok:
         result.quota = int(file.info()["X-Quota"])
         for line in file.readlines():
-            line = line.decode('utf-8')
-            print(line)
+            line = line.decode('utf-8')  # needed because py3 reads bytes via urllib
             phrase = Phrase()
             parts = line.split("\t")
             for token_with_tag in parts[0].split(" "):
