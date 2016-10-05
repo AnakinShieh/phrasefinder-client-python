@@ -15,8 +15,8 @@
 # limitations under the License.
 
 """
-Module phrasefinder provides routines for querying the PhraseFinder web service
-at http://phrasefinder.io.
+Module phrasefinder provides routines for querying the PhraseFinder web service at
+http://phrasefinder.io.
 """
 import sys
 if sys.version_info[0] < 3:
@@ -32,38 +32,33 @@ VERSION = 1000 # major * 10^6 + minor * 10^3 + micro
 """Defines the version number as one integer."""
 
 class Corpus(object):
-    """
-    Corpus contains numeric constants that represent corpora to be searched.
+    """Corpus contains numeric constants that represent corpora to be searched.
+    
     All corpora belong to version 2 of the Google Books Ngram Dataset
     (http://storage.googleapis.com/books/ngrams/books/datasetsv2.html).
     """
     EnglishUS, EnglishGB, Spanish, French, German, Russian, Chinese = range(7)
 
 class Status(object):
-    """
-    Status contains numeric constants that report whether a request was
-    successful or not. The value is derived from the HTTP status code sent along
-    with a response. Note that the numeric value does not correspond to the
-    original HTTP code.
+    """Status contains numeric constants that report whether a request was successful.
+
+    The value is derived from the HTTP status code sent along with a response. Note that the numeric
+    value does not correspond to the original HTTP code.
     """
     Ok, BadRequest, PaymentRequired, MethodNotAllowed, TooManyRequests, ServerError = range(6)
 
 class Token(object):
-    """
-    Token represents a single token (word, punctuation mark, etc.) as part of a phrase.
-    """
+    """Token represents a single token (word, punctuation mark, etc.) as part of a phrase."""
     class Tag(object):
-        """
-        Tag denotes the role of a token with respect to the query.
-        """
+        """Tag denotes the role of a token with respect to the query."""
         Given, Inserted, Alternative, Completed = range(4)
     def __init__(self):
         self.text = ""
         self.tag  = Token.Tag.Given
 
 class Phrase(object):
-    """
-    Phrase represents a phrase, also called n-gram.
+    """Phrase represents a phrase, also called n-gram.
+    
     A phrase consists of a sequence of tokens and metadata.
     """
     def __init__(self):
@@ -76,9 +71,7 @@ class Phrase(object):
         self.score        = 0.0  # The relative frequency it matched the given query.
 
 class Options(object):
-    """
-    Options represents optional parameters that can be sent along with a query.
-    """
+    """Options represents optional parameters that can be sent along with a query."""
     def __init__(self):
         self.corpus = Corpus.EnglishUS
         self.nmin   = 1
@@ -87,23 +80,20 @@ class Options(object):
         self.key    = ""
 
 class Result(object):
-    """
-    Result represents a search result.
-    """
+    """Result represents a search result."""
     def __init__(self):
         self.status  = Status.Ok
         self.phrases = []  # List of Phrase instances.
         self.quota   = 0
 
 def search(query, options=Options()):
-    """
-    Search sends a request to the server.
-    The second argument can be nil to go with default parameters.
-    It returns a Result object whose status field is equal to StatusOk if the
-    request was successful. In this case other fields of the object are in valid
-    state and can be read. Any status other than StatusOk indicates a failed
-    request. In that case other fields in the result have unspecified data.
-    Critical errors are reported via err that is not nil.
+    """Search sends a request to the server.
+    
+    Returns:
+      An Result object whose status attribute is equal to Status.Ok if the request was successful.
+      In this case other attributes of the object have valid data and can be read. Any status other
+      than Status.Ok indicates a failed request. In that case other attributes in the result have
+      unspecified data. Critical errors are reported throwing an exception.
     """
     http_response_code_to_status = {
         200: Status.Ok,
