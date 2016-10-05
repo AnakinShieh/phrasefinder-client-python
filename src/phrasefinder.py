@@ -38,15 +38,6 @@ class Corpus(object):
     (http://storage.googleapis.com/books/ngrams/books/datasetsv2.html).
     """
     EnglishUS, EnglishGB, Spanish, French, German, Russian, Chinese = range(7)
-    _to_string = {
-        EnglishUS: "eng-us",
-        EnglishGB: "eng-gb",
-        Spanish:   "spa",
-        French:    "fre",
-        German:    "ger",
-        Russian:   "rus",
-        Chinese:   "chi"  # Simplyfied Chinese
-    }
 
 class Status(object):
     """
@@ -148,10 +139,19 @@ def search(query, options=Options()):
     return result
 
 def _to_url(query, options):
+    corpus_to_string = {
+        Corpus.EnglishUS: "eng-us",
+        Corpus.EnglishGB: "eng-gb",
+        Corpus.Spanish:   "spa",
+        Corpus.French:    "fre",
+        Corpus.German:    "ger",
+        Corpus.Russian:   "rus",
+        Corpus.Chinese:   "chi"  # Simplyfied Chinese
+    }
     params = [
         ("format", "tsv"),
         ("query", query),
-        ("corpus", Corpus._to_string[options.corpus]),
+        ("corpus", corpus_to_string[options.corpus]),
         ("nmin", options.nmin),
         ("nmax", options.nmax),
         ("topk", options.topk)
