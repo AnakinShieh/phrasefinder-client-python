@@ -28,7 +28,7 @@ else:
     import urllib.request as urllibx
     from urllib.parse import urlencode as urlencode
 
-version = 1000 # major * 10^6 + minor * 10^3 + micro
+VERSION = 1000 # major * 10^6 + minor * 10^3 + micro
 """Defines the version number as one integer."""
 
 class Corpus(object):
