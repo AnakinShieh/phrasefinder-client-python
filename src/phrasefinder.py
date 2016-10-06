@@ -28,12 +28,15 @@ else:
     import urllib.request as urllibx
     from urllib.parse import urlencode as urlencode
 
-VERSION = 1000 # major * 10^6 + minor * 10^3 + micro
+VERSION_MAJOR = 0
+VERSION_MINOR = 1
+VERSION_MICRO = 1
+VERSION = VERSION_MAJOR * 1000000 + VERSION_MINOR * 1000 + VERSION_MICRO
 """Defines the version number as one integer."""
 
 class Corpus(object):
     """Corpus contains numeric constants that represent corpora to be searched.
-    
+
     All corpora belong to version 2 of the Google Books Ngram Dataset
     (http://storage.googleapis.com/books/ngrams/books/datasetsv2.html).
     """
@@ -58,7 +61,7 @@ class Token(object):
 
 class Phrase(object):
     """Phrase represents a phrase, also called n-gram.
-    
+
     A phrase consists of a sequence of tokens and metadata.
     """
     def __init__(self):
@@ -88,7 +91,7 @@ class Result(object):
 
 def search(query, options=Options()):
     """Search sends a request to the server.
-    
+
     Returns:
       An Result object whose status attribute is equal to Status.Ok if the request was successful.
       In this case other attributes of the object have valid data and can be read. Any status other
