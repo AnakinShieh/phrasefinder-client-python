@@ -974,6 +974,9 @@ table {
       
   <ul>
     <li class="mono"><a href="#phrasefinder.VERSION">VERSION</a></li>
+    <li class="mono"><a href="#phrasefinder.VERSION_MAJOR">VERSION_MAJOR</a></li>
+    <li class="mono"><a href="#phrasefinder.VERSION_MICRO">VERSION_MICRO</a></li>
+    <li class="mono"><a href="#phrasefinder.VERSION_MINOR">VERSION_MINOR</a></li>
   </ul>
 
     </li>
@@ -1082,12 +1085,15 @@ else:
     import urllib.request as urllibx
     from urllib.parse import urlencode as urlencode
 
-VERSION = 1000 # major * 10^6 + minor * 10^3 + micro
+VERSION_MAJOR = 0
+VERSION_MINOR = 1
+VERSION_MICRO = 1
+VERSION = VERSION_MAJOR * 1000000 + VERSION_MINOR * 1000 + VERSION_MICRO
 """Defines the version number as one integer."""
 
 class Corpus(object):
     """Corpus contains numeric constants that represent corpora to be searched.
-    
+
     All corpora belong to version 2 of the Google Books Ngram Dataset
     (http://storage.googleapis.com/books/ngrams/books/datasetsv2.html).
     """
@@ -1112,7 +1118,7 @@ class Token(object):
 
 class Phrase(object):
     """Phrase represents a phrase, also called n-gram.
-    
+
     A phrase consists of a sequence of tokens and metadata.
     """
     def __init__(self):
@@ -1142,7 +1148,7 @@ class Result(object):
 
 def search(query, options=Options()):
     """Search sends a request to the server.
-    
+
     Returns:
       An Result object whose status attribute is equal to Status.Ok if the request was successful.
       In this case other attributes of the object have valid data and can be read. Any status other
@@ -1219,12 +1225,36 @@ def _to_url(query, options):
 </div>
 
       </div>
+      <div class="item">
+      <p id="phrasefinder.VERSION_MAJOR" class="name">var <span class="ident">VERSION_MAJOR</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="phrasefinder.VERSION_MICRO" class="name">var <span class="ident">VERSION_MICRO</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
+      <div class="item">
+      <p id="phrasefinder.VERSION_MINOR" class="name">var <span class="ident">VERSION_MINOR</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
 
     <h2 class="section-title" id="header-functions">Functions</h2>
       
   <div class="item">
     <div class="name def" id="phrasefinder.search">
-    <p>def <span class="ident">search</span>(</p><p>query, options=&lt;__pdoc_file_module__.Options object at 0x7ff167a385d0&gt;)</p>
+    <p>def <span class="ident">search</span>(</p><p>query, options=&lt;__pdoc_file_module__.Options object at 0x7f54d9bc55d0&gt;)</p>
     </div>
     
 
@@ -1241,7 +1271,7 @@ def _to_url(query, options):
   <div id="source-phrasefinder.search" class="source">
     <pre><code>def search(query, options=Options()):
     """Search sends a request to the server.
-    
+
     Returns:
       An Result object whose status attribute is equal to Status.Ok if the request was successful.
       In this case other attributes of the object have valid data and can be read. Any status other
@@ -1300,7 +1330,7 @@ def _to_url(query, options):
   <div id="source-phrasefinder.Corpus" class="source">
     <pre><code>class Corpus(object):
     """Corpus contains numeric constants that represent corpora to be searched.
-    
+
     All corpora belong to version 2 of the Google Books Ngram Dataset
     (http://storage.googleapis.com/books/ngrams/books/datasetsv2.html).
     """
@@ -1507,7 +1537,7 @@ def _to_url(query, options):
   <div id="source-phrasefinder.Phrase" class="source">
     <pre><code>class Phrase(object):
     """Phrase represents a phrase, also called n-gram.
-    
+
     A phrase consists of a sequence of tokens and metadata.
     """
     def __init__(self):
