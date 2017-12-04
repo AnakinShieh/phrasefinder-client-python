@@ -4,6 +4,7 @@ import phrasefinder
 
 
 def main():
+    """Requests the PhraseFinder web service and prints out the result."""
 
     # Set up your query.
     query = 'I like ???'
@@ -25,7 +26,6 @@ def main():
             for token in phrase.tokens:
                 print(' {}_{}'.format(token.text, token.tag), end="")
             print()
-        print('Remaining quota: {}'.format(result.quota))
 
     except Exception as error:
         print('Some error occurred: {}'.format(error))
