@@ -40,7 +40,7 @@ class Corpus(object):
     All corpora belong to version 2 of the Google Books Ngram Dataset
     (http://storage.googleapis.com/books/ngrams/books/datasetsv2.html).
     """
-    EnglishUS, EnglishGB, Spanish, French, German, Russian, Chinese = range(7)
+    AmericanEnglish, BritishEnglish, Chinese, French, German, Russian, Spanish = range(7)
 
 class Status(object):
     """Status contains numeric constants that report whether a request was successful.
@@ -76,7 +76,7 @@ class Phrase(object):
 class Options(object):
     """Options represents optional parameters that can be sent along with a query."""
     def __init__(self):
-        self.corpus = Corpus.EnglishUS
+        self.corpus = Corpus.AmericanEnglish
         self.nmin   = 1
         self.nmax   = 5
         self.topk   = 100
@@ -130,13 +130,13 @@ def search(query, options=Options()):
 
 def _to_url(query, options):
     corpus_to_string = {
-        Corpus.EnglishUS: "eng-us",
-        Corpus.EnglishGB: "eng-gb",
-        Corpus.Spanish:   "spa",
-        Corpus.French:    "fre",
-        Corpus.German:    "ger",
-        Corpus.Russian:   "rus",
-        Corpus.Chinese:   "chi"  # Simplyfied Chinese
+        Corpus.AmericanEnglish: "eng-us",
+        Corpus.BritishEnglish:  "eng-gb",
+        Corpus.Chinese:         "chi",
+        Corpus.French:          "fre",
+        Corpus.German:          "ger",
+        Corpus.Russian:         "rus",
+        Corpus.Spanish:         "spa"
     }
     params = [
         ("format", "tsv"),
