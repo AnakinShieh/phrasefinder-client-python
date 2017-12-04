@@ -48,7 +48,7 @@ class Status(object):
     The value is derived from the HTTP status code sent along with a response. Note that the numeric
     value does not correspond to the original HTTP code.
     """
-    Ok, BadRequest, PaymentRequired, MethodNotAllowed, TooManyRequests, ServerError = range(6)
+    Ok, BadRequest, MethodNotAllowed, ServerError = range(4)
 
 class Token(object):
     """Token represents a single token (word, punctuation mark, etc.) as part of a phrase."""
@@ -100,9 +100,7 @@ def search(query, options=Options()):
     http_response_code_to_status = {
         200: Status.Ok,
         400: Status.BadRequest,
-        402: Status.PaymentRequired,
         405: Status.MethodNotAllowed,
-        429: Status.TooManyRequests,
         500: Status.ServerError
     }
     result = Result()
