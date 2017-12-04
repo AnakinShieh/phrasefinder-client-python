@@ -63,7 +63,6 @@ python src/demo.py
 0.057900 I_0 like_0 it_1 very_1 much_1
 0.055201 I_0 like_0 you_1 ._1 "_1
 0.053677 I_0 like_0 the_1 sound_1 of_1
-Remaining quota: 99
 ```
 
 ## Installation
