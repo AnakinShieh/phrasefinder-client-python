@@ -87,7 +87,6 @@ class Result(object):
     def __init__(self):
         self.status  = Status.Ok
         self.phrases = []  # List of Phrase instances.
-        self.quota   = 0
 
 def search(query, options=Options()):
     """Search sends a request to the server.
@@ -110,7 +109,6 @@ def search(query, options=Options()):
     context = urllibx.urlopen(_to_url(query, options))
     result.status = http_response_code_to_status[context.getcode()]
     if result.status == Status.Ok:
-        result.quota = int(context.info()["X-Quota"])
         for line in context.readlines():
             line = line.decode('utf-8')
             phrase = Phrase()
