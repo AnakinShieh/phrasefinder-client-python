@@ -15,7 +15,7 @@
 # limitations under the License.
 
 """
-Module phrasefinder provides routines for querying the PhraseFinder web service at
+The phrasefinder module provides routines for querying the PhraseFinder web service at
 http://phrasefinder.io.
 """
 import sys
