@@ -57,7 +57,7 @@ class Token(object):
         Given, Inserted, Alternative, Completed = range(4)
     def __init__(self):
         self.text = ""
-        self.tag  = Token.Tag.Given
+        self.tag = Token.Tag.Given
 
 class Phrase(object):
     """Phrase represents a phrase, also called n-gram.
@@ -65,27 +65,27 @@ class Phrase(object):
     A phrase consists of a sequence of tokens and metadata.
     """
     def __init__(self):
-        self.tokens       = []   # The tokens of the phrase.
-        self.match_count  = 0    # The absolute frequency in the corpus.
-        self.volume_count = 0    # The number of books it appears in.
-        self.first_year   = 0    # Publication date of the first book it appears in.
-        self.last_year    = 0    # Publication date of the last book it appears in.
-        self.relative_id  = 0    # See the API documentation on the website.
-        self.score        = 0.0  # The relative frequency it matched the given query.
+        self.tokens = []       # The tokens of the phrase.
+        self.match_count = 0   # The absolute frequency in the corpus.
+        self.volume_count = 0  # The number of books it appears in.
+        self.first_year = 0    # Publication date of the first book it appears in.
+        self.last_year = 0     # Publication date of the last book it appears in.
+        self.relative_id = 0   # See the API documentation on the website.
+        self.score = 0.0       # The relative frequency it matched the given query.
 
 class Options(object):
     """Options represents optional parameters that can be sent along with a query."""
     def __init__(self):
         self.corpus = Corpus.AmericanEnglish
-        self.nmin   = 1
-        self.nmax   = 5
-        self.topk   = 100
-        self.key    = ""
+        self.nmin = 1
+        self.nmax = 5
+        self.topk = 100
+        self.key = ""
 
 class Result(object):
     """Result represents a search result."""
     def __init__(self):
-        self.status  = Status.Ok
+        self.status = Status.Ok
         self.phrases = []  # List of Phrase instances.
 
 def search(query, options=Options()):
@@ -116,14 +116,14 @@ def search(query, options=Options()):
             for token_with_tag in parts[0].split(" "):
                 token = Token()
                 token.text = token_with_tag[:-2]
-                token.tag  = int(token_with_tag[-1])
+                token.tag = int(token_with_tag[-1])
                 phrase.tokens.append(token)
-            phrase.match_count  = int(parts[1])
+            phrase.match_count = int(parts[1])
             phrase.volume_count = int(parts[2])
-            phrase.first_year   = int(parts[3])
-            phrase.last_year    = int(parts[4])
-            phrase.relative_id  = int(parts[5])
-            phrase.score        = float(parts[6])
+            phrase.first_year = int(parts[3])
+            phrase.last_year = int(parts[4])
+            phrase.relative_id = int(parts[5])
+            phrase.score = float(parts[6])
             result.phrases.append(phrase)
     context.close()
     return result
@@ -149,4 +149,3 @@ def _to_url(query, options):
     if options.key:
         params.append(("key", options.key))
     return "http://phrasefinder.io/search?" + urlencode(params)
-
