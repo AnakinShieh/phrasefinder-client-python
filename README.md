@@ -11,6 +11,7 @@ from __future__ import print_function
 import phrasefinder
 
 def main():
+    """Requests the PhraseFinder web service and prints out the result."""
 
     # Set up your query.
     query = 'I like ???'
@@ -32,7 +33,6 @@ def main():
             for token in phrase.tokens:
                 print(' {}_{}'.format(token.text, token.tag), end="")
             print()
-        print('Remaining quota: {}'.format(result.quota))
 
     except Exception as error:
         print('Some error occurred: {}'.format(error))
@@ -42,7 +42,7 @@ if __name__ == '__main__':
     main()
 ```
 
-## Clone and run
+## How to run the demo
 
 ```sh
 git clone https://github.com/mtrenkmann/phrasefinder-client-python.git
