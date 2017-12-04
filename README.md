@@ -1,6 +1,6 @@
 # PhraseFinder Python Client
 
-The official Python client for the [PhraseFinder](http://phrasefinder.io) web service
+[PhraseFinder](http://phrasefinder.io) is a search engine for the [Google Books Ngram Dataset](http://storage.googleapis.com/books/ngrams/books/datasetsv2.html) (version 2). This repository contains the official Python client for requesting PhraseFinder's web [API](http://phrasefinder.io/api) which is free to use for any purpose.
 
 * [Documentation](https://mtrenkmann.github.io/phrasefinder-client-python/)
 
