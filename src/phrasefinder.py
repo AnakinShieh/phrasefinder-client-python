@@ -80,7 +80,6 @@ class Options(object):
         self.nmin = 1
         self.nmax = 5
         self.topk = 100
-        self.key = ""
 
 class Result(object):
     """Result represents a search result."""
@@ -144,6 +143,4 @@ def _to_url(query, options):
         ("nmax", options.nmax),
         ("topk", options.topk)
     ]
-    if options.key:
-        params.append(("key", options.key))
     return "http://phrasefinder.io/search?" + urlencode(params)
