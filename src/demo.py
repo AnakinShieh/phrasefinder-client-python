@@ -15,8 +15,8 @@ def main():
 
     # Send the request.
     try:
-        result = pf.search(pf.Corpus.AmericanEnglish, query, options)
-        if result.status != pf.Status.Ok:
+        result = pf.search(pf.Corpus.AMERICAN_ENGLISH, query, options)
+        if result.status != pf.Status.OK:
             print('Request was not successful: {}'.format(result.status))
             return
 

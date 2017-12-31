@@ -19,6 +19,8 @@ The phrasefinder module provides routines for querying the PhraseFinder web serv
 http://phrasefinder.io.
 """
 import sys
+from enum import Enum, unique
+
 if sys.version_info[0] < 3:
     # Python 2.
     import urllib as urllibx
@@ -34,30 +36,61 @@ VERSION_BUILD = 0
 VERSION = VERSION_MAJOR * 1000000 + VERSION_MINOR * 1000 + VERSION_BUILD
 """Defines the version number as one integer."""
 
-class Corpus(object):
+@unique
+class Corpus(Enum):
     """Corpus contains numeric constants that represent corpora to be searched.
 
     All corpora belong to version 2 of the Google Books Ngram Dataset
     (http://storage.googleapis.com/books/ngrams/books/datasetsv2.html).
     """
-    Null, AmericanEnglish, BritishEnglish, Chinese, French, German, Russian, Spanish = range(8)
+    NULL = 0
+    AMERICAN_ENGLISH = 1
+    BRITISH_ENGLISH = 2
+    CHINESE = 3
+    FRENCH = 4
+    GERMAN = 5
+    RUSSIAN = 6
+    SPANISH = 7
 
-class Status(object):
+    def short_name(self):
+        """Returns the short name of this enum constant."""
+        return {
+            0: "null",
+            1: "eng-us",
+            2: "eng-gb",
+            3: "chi",
+            4: "fre",
+            5: "ger",
+            6: "rus",
+            7: "spa"
+        }[self.value]
+
+
+@unique
+class Status(Enum):
     """Status contains numeric constants that report whether a request was successful.
 
     The value is derived from the HTTP status code sent along with a response. Note that the numeric
     value does not correspond to the original HTTP code.
     """
-    Ok, BadRequest, BadGateway = range(3)
+    OK = 0
+    BAD_REQUEST = 1
+    BAD_GATEWAY = 2
 
 class Token(object):
     """Token represents a single token (word, punctuation mark, etc.) as part of a phrase."""
-    class Tag(object):
+
+    @unique
+    class Tag(Enum):
         """Tag denotes the role of a token with respect to the query."""
-        Given, Inserted, Alternative, Completed = range(4)
+        GIVEN = 0
+        INSERTED = 1
+        ALTERNATIVE = 2
+        COMPLETED = 3
+
     def __init__(self):
         self.text = ""
-        self.tag = Token.Tag.Given
+        self.tag = Token.Tag.GIVEN
 
 class Phrase(object):
     """Phrase represents a phrase, also called n-gram.
@@ -76,19 +109,19 @@ class Phrase(object):
 class SearchOptions(object):
     """SearchOptions represents optional parameters that can be sent along with a query."""
 
-    default_nmin = 1    # read-only
-    default_nmax = 5    # read-only
-    default_topk = 100  # read-only
+    DEFAULT_NMIN = 1    # read-only
+    DEFAULT_NMAX = 5    # read-only
+    DEFAULT_TOPK = 100  # read-only
 
     def __init__(self):
-        self.nmin = SearchOptions.default_nmin
-        self.nmax = SearchOptions.default_nmax
-        self.topk = SearchOptions.default_topk
+        self.nmin = SearchOptions.DEFAULT_NMIN
+        self.nmax = SearchOptions.DEFAULT_NMAX
+        self.topk = SearchOptions.DEFAULT_TOPK
 
 class SearchResult(object):
     """SearchResult represents the outcome of a search request."""
     def __init__(self):
-        self.status = Status.Ok
+        self.status = Status.OK
         self.phrases = []  # List of Phrase instances.
 
 def search(corpus, query, options=SearchOptions()):
@@ -101,14 +134,14 @@ def search(corpus, query, options=SearchOptions()):
       result have unspecified data. Critical errors are reported throwing an exception.
     """
     http_response_code_to_status = {
-        200: Status.Ok,
-        400: Status.BadRequest,
-        502: Status.BadGateway
+        200: Status.OK,
+        400: Status.BAD_REQUEST,
+        502: Status.BAD_GATEWAY
     }
     result = SearchResult()
     context = urllibx.urlopen(_make_url(corpus, query, options))
     result.status = http_response_code_to_status[context.getcode()]
-    if result.status == Status.Ok:
+    if result.status == Status.OK:
         for line in context.readlines():
             line = line.decode('utf-8')
             phrase = Phrase()
@@ -129,25 +162,15 @@ def search(corpus, query, options=SearchOptions()):
     return result
 
 def _make_url(corpus, query, options):
-    corpus_to_short_name = {
-        Corpus.Null:            "null",
-        Corpus.AmericanEnglish: "eng-us",
-        Corpus.BritishEnglish:  "eng-gb",
-        Corpus.Chinese:         "chi",
-        Corpus.French:          "fre",
-        Corpus.German:          "ger",
-        Corpus.Russian:         "rus",
-        Corpus.Spanish:         "spa"
-    }
     params = [
         ("format", "tsv"),
-        ("corpus", corpus_to_short_name[corpus]),
+        ("corpus", corpus.short_name()),
         ("query", query)
     ]
-    if options.nmin != SearchOptions.default_nmin:
+    if options.nmin != SearchOptions.DEFAULT_NMIN:
         params.append(("nmin", options.nmin))
-    if options.nmax != SearchOptions.default_nmax:
+    if options.nmax != SearchOptions.DEFAULT_NMAX:
         params.append(("nmax", options.nmax))
-    if options.topk != SearchOptions.default_topk:
+    if options.topk != SearchOptions.DEFAULT_TOPK:
         params.append(("topk", options.topk))
     return "http://phrasefinder.io/search?" + urlencode(params)
