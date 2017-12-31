@@ -75,10 +75,15 @@ class Phrase(object):
 
 class SearchOptions(object):
     """SearchOptions represents optional parameters that can be sent along with a query."""
+
+    default_nmin = 1    # read-only
+    default_nmax = 5    # read-only
+    default_topk = 100  # read-only
+
     def __init__(self):
-        self.nmin = 1
-        self.nmax = 5
-        self.topk = 100
+        self.nmin = SearchOptions.default_nmin
+        self.nmax = SearchOptions.default_nmax
+        self.topk = SearchOptions.default_topk
 
 class SearchResult(object):
     """SearchResult represents the outcome of a search request."""
@@ -137,9 +142,12 @@ def _to_url(corpus, query, options):
     params = [
         ("format", "tsv"),
         ("corpus", corpus_to_string[corpus]),
-        ("query", query),
-        ("nmin", options.nmin),
-        ("nmax", options.nmax),
-        ("topk", options.topk)
+        ("query", query)
     ]
+    if options.nmin != SearchOptions.default_nmin:
+        params.append(("nmin", options.nmin))
+    if options.nmax != SearchOptions.default_nmax:
+        params.append(("nmax", options.nmax))
+    if options.topk != SearchOptions.default_topk:
+        params.append(("topk", options.topk))
     return "http://phrasefinder.io/search?" + urlencode(params)
