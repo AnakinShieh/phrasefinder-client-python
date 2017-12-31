@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+
+"""This module provides routines for querying the PhraseFinder web service."""
+
 from __future__ import print_function
 import phrasefinder as pf
 
