@@ -29,7 +29,7 @@ else:
     from urllib.parse import urlencode as urlencode
 
 VERSION_MAJOR = 0
-VERSION_MINOR = 3
+VERSION_MINOR = 4
 VERSION_BUILD = 0
 VERSION = VERSION_MAJOR * 1000000 + VERSION_MINOR * 1000 + VERSION_BUILD
 """Defines the version number as one integer."""
