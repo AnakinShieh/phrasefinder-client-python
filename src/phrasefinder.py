@@ -106,7 +106,7 @@ def search(corpus, query, options=SearchOptions()):
         502: Status.BadGateway
     }
     result = SearchResult()
-    context = urllibx.urlopen(_to_url(corpus, query, options))
+    context = urllibx.urlopen(_make_url(corpus, query, options))
     result.status = http_response_code_to_status[context.getcode()]
     if result.status == Status.Ok:
         for line in context.readlines():
@@ -128,7 +128,7 @@ def search(corpus, query, options=SearchOptions()):
     context.close()
     return result
 
-def _to_url(corpus, query, options):
+def _make_url(corpus, query, options):
     corpus_to_short_name = {
         Corpus.Null:            "null",
         Corpus.AmericanEnglish: "eng-us",
