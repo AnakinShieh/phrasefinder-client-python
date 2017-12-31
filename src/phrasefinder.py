@@ -81,8 +81,8 @@ class SearchOptions(object):
         self.nmax = 5
         self.topk = 100
 
-class Result(object):
-    """Result represents a search result."""
+class SearchResult(object):
+    """SearchResult represents the outcome of a search request."""
     def __init__(self):
         self.status = Status.Ok
         self.phrases = []  # List of Phrase instances.
@@ -101,7 +101,7 @@ def search(query, options=SearchOptions()):
         400: Status.BadRequest,
         502: Status.BadGateway
     }
-    result = Result()
+    result = SearchResult()
     context = urllibx.urlopen(_to_url(query, options))
     result.status = http_response_code_to_status[context.getcode()]
     if result.status == Status.Ok:
