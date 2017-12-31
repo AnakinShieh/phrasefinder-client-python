@@ -996,15 +996,6 @@ table {
         
         </li>
         <li class="mono">
-        <span class="class_name"><a href="#phrasefinder.Options">Options</a></span>
-        
-          
-  <ul>
-    <li class="mono"><a href="#phrasefinder.Options.__init__">__init__</a></li>
-  </ul>
-
-        </li>
-        <li class="mono">
         <span class="class_name"><a href="#phrasefinder.Phrase">Phrase</a></span>
         
           
@@ -1014,11 +1005,20 @@ table {
 
         </li>
         <li class="mono">
-        <span class="class_name"><a href="#phrasefinder.Result">Result</a></span>
+        <span class="class_name"><a href="#phrasefinder.SearchOptions">SearchOptions</a></span>
         
           
   <ul>
-    <li class="mono"><a href="#phrasefinder.Result.__init__">__init__</a></li>
+    <li class="mono"><a href="#phrasefinder.SearchOptions.__init__">__init__</a></li>
+  </ul>
+
+        </li>
+        <li class="mono">
+        <span class="class_name"><a href="#phrasefinder.SearchResult">SearchResult</a></span>
+        
+          
+  <ul>
+    <li class="mono"><a href="#phrasefinder.SearchResult.__init__">__init__</a></li>
   </ul>
 
         </li>
@@ -1086,7 +1086,7 @@ else:
     from urllib.parse import urlencode as urlencode
 
 VERSION_MAJOR = 0
-VERSION_MINOR = 3
+VERSION_MINOR = 4
 VERSION_BUILD = 0
 VERSION = VERSION_MAJOR * 1000000 + VERSION_MINOR * 1000 + VERSION_BUILD
 """Defines the version number as one integer."""
@@ -1097,7 +1097,7 @@ class Corpus(object):
     All corpora belong to version 2 of the Google Books Ngram Dataset
     (http://storage.googleapis.com/books/ngrams/books/datasetsv2.html).
     """
-    AmericanEnglish, BritishEnglish, Chinese, French, German, Russian, Spanish = range(7)
+    Null, AmericanEnglish, BritishEnglish, Chinese, French, German, Russian, Spanish = range(8)
 
 class Status(object):
     """Status contains numeric constants that report whether a request was successful.
@@ -1105,7 +1105,7 @@ class Status(object):
     The value is derived from the HTTP status code sent along with a response. Note that the numeric
     value does not correspond to the original HTTP code.
     """
-    Ok, BadRequest, MethodNotAllowed, ServerError = range(4)
+    Ok, BadRequest, BadGateway = range(3)
 
 class Token(object):
     """Token represents a single token (word, punctuation mark, etc.) as part of a phrase."""
@@ -1127,24 +1127,28 @@ class Phrase(object):
         self.volume_count = 0  # The number of books it appears in.
         self.first_year = 0    # Publication date of the first book it appears in.
         self.last_year = 0     # Publication date of the last book it appears in.
-        self.relative_id = 0   # See the API documentation on the website.
         self.score = 0.0       # The relative frequency it matched the given query.
+        self.id = 0            # See the API documentation on the website.
 
-class Options(object):
-    """Options represents optional parameters that can be sent along with a query."""
+class SearchOptions(object):
+    """SearchOptions represents optional parameters that can be sent along with a query."""
+
+    default_nmin = 1    # read-only
+    default_nmax = 5    # read-only
+    default_topk = 100  # read-only
+
     def __init__(self):
-        self.corpus = Corpus.AmericanEnglish
-        self.nmin = 1
-        self.nmax = 5
-        self.topk = 100
+        self.nmin = SearchOptions.default_nmin
+        self.nmax = SearchOptions.default_nmax
+        self.topk = SearchOptions.default_topk
 
-class Result(object):
-    """Result represents a search result."""
+class SearchResult(object):
+    """SearchResult represents the outcome of a search request."""
     def __init__(self):
         self.status = Status.Ok
         self.phrases = []  # List of Phrase instances.
 
-def search(query, options=Options()):
+def search(corpus, query, options=SearchOptions()):
     """Search sends a request to the server.
 
     Returns:
@@ -1156,11 +1160,10 @@ def search(query, options=Options()):
     http_response_code_to_status = {
         200: Status.Ok,
         400: Status.BadRequest,
-        405: Status.MethodNotAllowed,
-        500: Status.ServerError
+        502: Status.BadGateway
     }
-    result = Result()
-    context = urllibx.urlopen(_to_url(query, options))
+    result = SearchResult()
+    context = urllibx.urlopen(_make_url(corpus, query, options))
     result.status = http_response_code_to_status[context.getcode()]
     if result.status == Status.Ok:
         for line in context.readlines():
@@ -1176,14 +1179,15 @@ def search(query, options=Options()):
             phrase.volume_count = int(parts[2])
             phrase.first_year = int(parts[3])
             phrase.last_year = int(parts[4])
-            phrase.relative_id = int(parts[5])
+            phrase.id = int(parts[5])
             phrase.score = float(parts[6])
             result.phrases.append(phrase)
     context.close()
     return result
 
-def _to_url(query, options):
-    corpus_to_string = {
+def _make_url(corpus, query, options):
+    corpus_to_short_name = {
+        Corpus.Null:            "null",
         Corpus.AmericanEnglish: "eng-us",
         Corpus.BritishEnglish:  "eng-gb",
         Corpus.Chinese:         "chi",
@@ -1194,12 +1198,15 @@ def _to_url(query, options):
     }
     params = [
         ("format", "tsv"),
-        ("query", query),
-        ("corpus", corpus_to_string[options.corpus]),
-        ("nmin", options.nmin),
-        ("nmax", options.nmax),
-        ("topk", options.topk)
+        ("corpus", corpus_to_short_name[corpus]),
+        ("query", query)
     ]
+    if options.nmin != SearchOptions.default_nmin:
+        params.append(("nmin", options.nmin))
+    if options.nmax != SearchOptions.default_nmax:
+        params.append(("nmax", options.nmax))
+    if options.topk != SearchOptions.default_topk:
+        params.append(("topk", options.topk))
     return "http://phrasefinder.io/search?" + urlencode(params)
 </code></pre>
   </div>
@@ -1246,7 +1253,7 @@ def _to_url(query, options):
       
   <div class="item">
     <div class="name def" id="phrasefinder.search">
-    <p>def <span class="ident">search</span>(</p><p>query, options=&lt;__pdoc_file_module__.Options object at 0x7f6a24849690&gt;)</p>
+    <p>def <span class="ident">search</span>(</p><p>corpus, query, options=&lt;__pdoc_file_module__.SearchOptions object at 0x7f0366e44750&gt;)</p>
     </div>
     
 
@@ -1261,7 +1268,7 @@ def _to_url(query, options):
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-phrasefinder.search', this);">Show source &equiv;</a></p>
   <div id="source-phrasefinder.search" class="source">
-    <pre><code>def search(query, options=Options()):
+    <pre><code>def search(corpus, query, options=SearchOptions()):
     """Search sends a request to the server.
 
     Returns:
@@ -1273,11 +1280,10 @@ def _to_url(query, options):
     http_response_code_to_status = {
         200: Status.Ok,
         400: Status.BadRequest,
-        405: Status.MethodNotAllowed,
-        500: Status.ServerError
+        502: Status.BadGateway
     }
-    result = Result()
-    context = urllibx.urlopen(_to_url(query, options))
+    result = SearchResult()
+    context = urllibx.urlopen(_make_url(corpus, query, options))
     result.status = http_response_code_to_status[context.getcode()]
     if result.status == Status.Ok:
         for line in context.readlines():
@@ -1293,7 +1299,7 @@ def _to_url(query, options):
             phrase.volume_count = int(parts[2])
             phrase.first_year = int(parts[3])
             phrase.last_year = int(parts[4])
-            phrase.relative_id = int(parts[5])
+            phrase.id = int(parts[5])
             phrase.score = float(parts[6])
             result.phrases.append(phrase)
     context.close()
@@ -1323,7 +1329,7 @@ def _to_url(query, options):
     All corpora belong to version 2 of the Google Books Ngram Dataset
     (http://storage.googleapis.com/books/ngrams/books/datasetsv2.html).
     """
-    AmericanEnglish, BritishEnglish, Chinese, French, German, Russian, Spanish = range(7)
+    Null, AmericanEnglish, BritishEnglish, Chinese, French, German, Russian, Spanish = range(8)
 </code></pre>
   </div>
 </div>
@@ -1387,6 +1393,16 @@ def _to_url(query, options):
 
             </div>
             <div class="item">
+            <p id="phrasefinder.Corpus.Null" class="name">var <span class="ident">Null</span></p>
+            
+
+            
+  
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
             <p id="phrasefinder.Corpus.Russian" class="name">var <span class="ident">Russian</span></p>
             
 
@@ -1410,100 +1426,6 @@ def _to_url(query, options):
       </div>
       
       <div class="item">
-      <p id="phrasefinder.Options" class="name">class <span class="ident">Options</span></p>
-      
-  
-    <div class="desc"><p>Options represents optional parameters that can be sent along with a query.</p></div>
-  <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-phrasefinder.Options', this);">Show source &equiv;</a></p>
-  <div id="source-phrasefinder.Options" class="source">
-    <pre><code>class Options(object):
-    """Options represents optional parameters that can be sent along with a query."""
-    def __init__(self):
-        self.corpus = Corpus.AmericanEnglish
-        self.nmin = 1
-        self.nmax = 5
-        self.topk = 100
-</code></pre>
-  </div>
-</div>
-
-
-      <div class="class">
-          <h3>Ancestors (in MRO)</h3>
-          <ul class="class_list">
-          <li><a href="#phrasefinder.Options">Options</a></li>
-          <li>__builtin__.object</li>
-          </ul>
-          <h3>Instance variables</h3>
-            <div class="item">
-            <p id="phrasefinder.Options.corpus" class="name">var <span class="ident">corpus</span></p>
-            
-
-            
-  
-  <div class="source_cont">
-</div>
-
-            </div>
-            <div class="item">
-            <p id="phrasefinder.Options.nmax" class="name">var <span class="ident">nmax</span></p>
-            
-
-            
-  
-  <div class="source_cont">
-</div>
-
-            </div>
-            <div class="item">
-            <p id="phrasefinder.Options.nmin" class="name">var <span class="ident">nmin</span></p>
-            
-
-            
-  
-  <div class="source_cont">
-</div>
-
-            </div>
-            <div class="item">
-            <p id="phrasefinder.Options.topk" class="name">var <span class="ident">topk</span></p>
-            
-
-            
-  
-  <div class="source_cont">
-</div>
-
-            </div>
-          <h3>Methods</h3>
-            
-  <div class="item">
-    <div class="name def" id="phrasefinder.Options.__init__">
-    <p>def <span class="ident">__init__</span>(</p><p>self)</p>
-    </div>
-    
-
-    
-  
-  <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-phrasefinder.Options.__init__', this);">Show source &equiv;</a></p>
-  <div id="source-phrasefinder.Options.__init__" class="source">
-    <pre><code>def __init__(self):
-    self.corpus = Corpus.AmericanEnglish
-    self.nmin = 1
-    self.nmax = 5
-    self.topk = 100
-</code></pre>
-  </div>
-</div>
-
-  </div>
-  
-      </div>
-      </div>
-      
-      <div class="item">
       <p id="phrasefinder.Phrase" class="name">class <span class="ident">Phrase</span></p>
       
   
@@ -1523,8 +1445,8 @@ def _to_url(query, options):
         self.volume_count = 0  # The number of books it appears in.
         self.first_year = 0    # Publication date of the first book it appears in.
         self.last_year = 0     # Publication date of the last book it appears in.
-        self.relative_id = 0   # See the API documentation on the website.
         self.score = 0.0       # The relative frequency it matched the given query.
+        self.id = 0            # See the API documentation on the website.
 </code></pre>
   </div>
 </div>
@@ -1548,6 +1470,16 @@ def _to_url(query, options):
 
             </div>
             <div class="item">
+            <p id="phrasefinder.Phrase.id" class="name">var <span class="ident">id</span></p>
+            
+
+            
+  
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
             <p id="phrasefinder.Phrase.last_year" class="name">var <span class="ident">last_year</span></p>
             
 
@@ -1559,16 +1491,6 @@ def _to_url(query, options):
             </div>
             <div class="item">
             <p id="phrasefinder.Phrase.match_count" class="name">var <span class="ident">match_count</span></p>
-            
-
-            
-  
-  <div class="source_cont">
-</div>
-
-            </div>
-            <div class="item">
-            <p id="phrasefinder.Phrase.relative_id" class="name">var <span class="ident">relative_id</span></p>
             
 
             
@@ -1626,8 +1548,8 @@ def _to_url(query, options):
     self.volume_count = 0  # The number of books it appears in.
     self.first_year = 0    # Publication date of the first book it appears in.
     self.last_year = 0     # Publication date of the last book it appears in.
-    self.relative_id = 0   # See the API documentation on the website.
     self.score = 0.0       # The relative frequency it matched the given query.
+    self.id = 0            # See the API documentation on the website.
 </code></pre>
   </div>
 </div>
@@ -1638,18 +1560,24 @@ def _to_url(query, options):
       </div>
       
       <div class="item">
-      <p id="phrasefinder.Result" class="name">class <span class="ident">Result</span></p>
+      <p id="phrasefinder.SearchOptions" class="name">class <span class="ident">SearchOptions</span></p>
       
   
-    <div class="desc"><p>Result represents a search result.</p></div>
+    <div class="desc"><p>SearchOptions represents optional parameters that can be sent along with a query.</p></div>
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-phrasefinder.Result', this);">Show source &equiv;</a></p>
-  <div id="source-phrasefinder.Result" class="source">
-    <pre><code>class Result(object):
-    """Result represents a search result."""
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-phrasefinder.SearchOptions', this);">Show source &equiv;</a></p>
+  <div id="source-phrasefinder.SearchOptions" class="source">
+    <pre><code>class SearchOptions(object):
+    """SearchOptions represents optional parameters that can be sent along with a query."""
+
+    default_nmin = 1    # read-only
+    default_nmax = 5    # read-only
+    default_topk = 100  # read-only
+
     def __init__(self):
-        self.status = Status.Ok
-        self.phrases = []  # List of Phrase instances.
+        self.nmin = SearchOptions.default_nmin
+        self.nmax = SearchOptions.default_nmax
+        self.topk = SearchOptions.default_topk
 </code></pre>
   </div>
 </div>
@@ -1658,12 +1586,12 @@ def _to_url(query, options):
       <div class="class">
           <h3>Ancestors (in MRO)</h3>
           <ul class="class_list">
-          <li><a href="#phrasefinder.Result">Result</a></li>
+          <li><a href="#phrasefinder.SearchOptions">SearchOptions</a></li>
           <li>__builtin__.object</li>
           </ul>
-          <h3>Instance variables</h3>
+          <h3>Class variables</h3>
             <div class="item">
-            <p id="phrasefinder.Result.phrases" class="name">var <span class="ident">phrases</span></p>
+            <p id="phrasefinder.SearchOptions.default_nmax" class="name">var <span class="ident">default_nmax</span></p>
             
 
             
@@ -1673,7 +1601,48 @@ def _to_url(query, options):
 
             </div>
             <div class="item">
-            <p id="phrasefinder.Result.status" class="name">var <span class="ident">status</span></p>
+            <p id="phrasefinder.SearchOptions.default_nmin" class="name">var <span class="ident">default_nmin</span></p>
+            
+
+            
+  
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="phrasefinder.SearchOptions.default_topk" class="name">var <span class="ident">default_topk</span></p>
+            
+
+            
+  
+  <div class="source_cont">
+</div>
+
+            </div>
+          <h3>Instance variables</h3>
+            <div class="item">
+            <p id="phrasefinder.SearchOptions.nmax" class="name">var <span class="ident">nmax</span></p>
+            
+
+            
+  
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="phrasefinder.SearchOptions.nmin" class="name">var <span class="ident">nmin</span></p>
+            
+
+            
+  
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="phrasefinder.SearchOptions.topk" class="name">var <span class="ident">topk</span></p>
             
 
             
@@ -1685,7 +1654,7 @@ def _to_url(query, options):
           <h3>Methods</h3>
             
   <div class="item">
-    <div class="name def" id="phrasefinder.Result.__init__">
+    <div class="name def" id="phrasefinder.SearchOptions.__init__">
     <p>def <span class="ident">__init__</span>(</p><p>self)</p>
     </div>
     
@@ -1693,8 +1662,79 @@ def _to_url(query, options):
     
   
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-phrasefinder.Result.__init__', this);">Show source &equiv;</a></p>
-  <div id="source-phrasefinder.Result.__init__" class="source">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-phrasefinder.SearchOptions.__init__', this);">Show source &equiv;</a></p>
+  <div id="source-phrasefinder.SearchOptions.__init__" class="source">
+    <pre><code>def __init__(self):
+    self.nmin = SearchOptions.default_nmin
+    self.nmax = SearchOptions.default_nmax
+    self.topk = SearchOptions.default_topk
+</code></pre>
+  </div>
+</div>
+
+  </div>
+  
+      </div>
+      </div>
+      
+      <div class="item">
+      <p id="phrasefinder.SearchResult" class="name">class <span class="ident">SearchResult</span></p>
+      
+  
+    <div class="desc"><p>SearchResult represents the outcome of a search request.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-phrasefinder.SearchResult', this);">Show source &equiv;</a></p>
+  <div id="source-phrasefinder.SearchResult" class="source">
+    <pre><code>class SearchResult(object):
+    """SearchResult represents the outcome of a search request."""
+    def __init__(self):
+        self.status = Status.Ok
+        self.phrases = []  # List of Phrase instances.
+</code></pre>
+  </div>
+</div>
+
+
+      <div class="class">
+          <h3>Ancestors (in MRO)</h3>
+          <ul class="class_list">
+          <li><a href="#phrasefinder.SearchResult">SearchResult</a></li>
+          <li>__builtin__.object</li>
+          </ul>
+          <h3>Instance variables</h3>
+            <div class="item">
+            <p id="phrasefinder.SearchResult.phrases" class="name">var <span class="ident">phrases</span></p>
+            
+
+            
+  
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
+            <p id="phrasefinder.SearchResult.status" class="name">var <span class="ident">status</span></p>
+            
+
+            
+  
+  <div class="source_cont">
+</div>
+
+            </div>
+          <h3>Methods</h3>
+            
+  <div class="item">
+    <div class="name def" id="phrasefinder.SearchResult.__init__">
+    <p>def <span class="ident">__init__</span>(</p><p>self)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-phrasefinder.SearchResult.__init__', this);">Show source &equiv;</a></p>
+  <div id="source-phrasefinder.SearchResult.__init__" class="source">
     <pre><code>def __init__(self):
     self.status = Status.Ok
     self.phrases = []  # List of Phrase instances.
@@ -1723,7 +1763,7 @@ value does not correspond to the original HTTP code.</p></div>
     The value is derived from the HTTP status code sent along with a response. Note that the numeric
     value does not correspond to the original HTTP code.
     """
-    Ok, BadRequest, MethodNotAllowed, ServerError = range(4)
+    Ok, BadRequest, BadGateway = range(3)
 </code></pre>
   </div>
 </div>
@@ -1737,6 +1777,16 @@ value does not correspond to the original HTTP code.</p></div>
           </ul>
           <h3>Class variables</h3>
             <div class="item">
+            <p id="phrasefinder.Status.BadGateway" class="name">var <span class="ident">BadGateway</span></p>
+            
+
+            
+  
+  <div class="source_cont">
+</div>
+
+            </div>
+            <div class="item">
             <p id="phrasefinder.Status.BadRequest" class="name">var <span class="ident">BadRequest</span></p>
             
 
@@ -1747,27 +1797,7 @@ value does not correspond to the original HTTP code.</p></div>
 
             </div>
             <div class="item">
-            <p id="phrasefinder.Status.MethodNotAllowed" class="name">var <span class="ident">MethodNotAllowed</span></p>
-            
-
-            
-  
-  <div class="source_cont">
-</div>
-
-            </div>
-            <div class="item">
             <p id="phrasefinder.Status.Ok" class="name">var <span class="ident">Ok</span></p>
-            
-
-            
-  
-  <div class="source_cont">
-</div>
-
-            </div>
-            <div class="item">
-            <p id="phrasefinder.Status.ServerError" class="name">var <span class="ident">ServerError</span></p>
             
 
             
