@@ -92,13 +92,13 @@ class SearchResult(object):
         self.phrases = []  # List of Phrase instances.
 
 def search(corpus, query, options=SearchOptions()):
-    """Search sends a request to the server.
+    """Sends a search request to the server.
 
     Returns:
-      An Result object whose status attribute is equal to Status.Ok if the request was successful.
-      In this case other attributes of the object have valid data and can be read. Any status other
-      than Status.Ok indicates a failed request. In that case other attributes in the result have
-      unspecified data. Critical errors are reported throwing an exception.
+      A SearchResult object whose status attribute is equal to Status.Ok if the request was
+      successful. In this case other attributes of the object have valid data and can be read. Any
+      status other than Status.Ok indicates a failed request. In that case other attributes in the
+      result have unspecified data. Critical errors are reported throwing an exception.
     """
     http_response_code_to_status = {
         200: Status.Ok,
