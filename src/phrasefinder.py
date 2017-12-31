@@ -70,8 +70,8 @@ class Phrase(object):
         self.volume_count = 0  # The number of books it appears in.
         self.first_year = 0    # Publication date of the first book it appears in.
         self.last_year = 0     # Publication date of the last book it appears in.
-        self.relative_id = 0   # See the API documentation on the website.
         self.score = 0.0       # The relative frequency it matched the given query.
+        self.id = 0            # See the API documentation on the website.
 
 class Options(object):
     """Options represents optional parameters that can be sent along with a query."""
@@ -118,7 +118,7 @@ def search(query, options=Options()):
             phrase.volume_count = int(parts[2])
             phrase.first_year = int(parts[3])
             phrase.last_year = int(parts[4])
-            phrase.relative_id = int(parts[5])
+            phrase.id = int(parts[5])
             phrase.score = float(parts[6])
             result.phrases.append(phrase)
     context.close()
