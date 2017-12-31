@@ -10,7 +10,7 @@ def main():
     query = 'I like ???'
 
     # Set the optional parameter topk to 10.
-    options = phrasefinder.Options()
+    options = phrasefinder.SearchOptions()
     options.topk = 10
 
     # Perform a request.

@@ -73,8 +73,8 @@ class Phrase(object):
         self.score = 0.0       # The relative frequency it matched the given query.
         self.id = 0            # See the API documentation on the website.
 
-class Options(object):
-    """Options represents optional parameters that can be sent along with a query."""
+class SearchOptions(object):
+    """SearchOptions represents optional parameters that can be sent along with a query."""
     def __init__(self):
         self.corpus = Corpus.AmericanEnglish
         self.nmin = 1
@@ -87,7 +87,7 @@ class Result(object):
         self.status = Status.Ok
         self.phrases = []  # List of Phrase instances.
 
-def search(query, options=Options()):
+def search(query, options=SearchOptions()):
     """Search sends a request to the server.
 
     Returns:
