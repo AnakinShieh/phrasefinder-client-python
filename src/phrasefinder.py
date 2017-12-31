@@ -129,7 +129,7 @@ def search(corpus, query, options=SearchOptions()):
     return result
 
 def _to_url(corpus, query, options):
-    corpus_to_string = {
+    corpus_to_short_name = {
         Corpus.Null:            "null",
         Corpus.AmericanEnglish: "eng-us",
         Corpus.BritishEnglish:  "eng-gb",
@@ -141,7 +141,7 @@ def _to_url(corpus, query, options):
     }
     params = [
         ("format", "tsv"),
-        ("corpus", corpus_to_string[corpus]),
+        ("corpus", corpus_to_short_name[corpus]),
         ("query", query)
     ]
     if options.nmin != SearchOptions.default_nmin:
