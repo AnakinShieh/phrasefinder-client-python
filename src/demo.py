@@ -9,11 +9,11 @@ def main():
     # Set up your query.
     query = 'I like ???'
 
-    # Set the optional parameter topk to 10.
+    # Optional: set the maximum number of phrases to return.
     options = pf.SearchOptions()
     options.topk = 10
 
-    # Perform a request.
+    # Send the request.
     try:
         result = pf.search(pf.Corpus.AmericanEnglish, query, options)
         if result.status != pf.Status.Ok:
@@ -24,7 +24,7 @@ def main():
         for phrase in result.phrases:
             print("{0:6f}".format(phrase.score), end="")
             for token in phrase.tokens:
-                print(' {}_{}'.format(token.text, token.tag), end="")
+                print(" {}".format(token.text), end="")
             print()
 
     except Exception as error:
