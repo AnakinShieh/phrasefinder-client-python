@@ -40,7 +40,7 @@ class Corpus(object):
     All corpora belong to version 2 of the Google Books Ngram Dataset
     (http://storage.googleapis.com/books/ngrams/books/datasetsv2.html).
     """
-    AmericanEnglish, BritishEnglish, Chinese, French, German, Russian, Spanish = range(7)
+    Null, AmericanEnglish, BritishEnglish, Chinese, French, German, Russian, Spanish = range(8)
 
 class Status(object):
     """Status contains numeric constants that report whether a request was successful.
@@ -127,6 +127,7 @@ def search(query, options=Options()):
 
 def _to_url(query, options):
     corpus_to_string = {
+        Corpus.Null:            "null",
         Corpus.AmericanEnglish: "eng-us",
         Corpus.BritishEnglish:  "eng-gb",
         Corpus.Chinese:         "chi",
