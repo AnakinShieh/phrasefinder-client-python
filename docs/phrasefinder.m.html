@@ -1149,13 +1149,13 @@ class SearchResult(object):
         self.phrases = []  # List of Phrase instances.
 
 def search(corpus, query, options=SearchOptions()):
-    """Search sends a request to the server.
+    """Sends a search request to the server.
 
     Returns:
-      An Result object whose status attribute is equal to Status.Ok if the request was successful.
-      In this case other attributes of the object have valid data and can be read. Any status other
-      than Status.Ok indicates a failed request. In that case other attributes in the result have
-      unspecified data. Critical errors are reported throwing an exception.
+      A SearchResult object whose status attribute is equal to Status.Ok if the request was
+      successful. In this case other attributes of the object have valid data and can be read. Any
+      status other than Status.Ok indicates a failed request. In that case other attributes in the
+      result have unspecified data. Critical errors are reported throwing an exception.
     """
     http_response_code_to_status = {
         200: Status.Ok,
@@ -1253,29 +1253,29 @@ def _make_url(corpus, query, options):
       
   <div class="item">
     <div class="name def" id="phrasefinder.search">
-    <p>def <span class="ident">search</span>(</p><p>corpus, query, options=&lt;__pdoc_file_module__.SearchOptions object at 0x7f0366e44750&gt;)</p>
+    <p>def <span class="ident">search</span>(</p><p>corpus, query, options=&lt;__pdoc_file_module__.SearchOptions object at 0x7f81d8b20750&gt;)</p>
     </div>
     
 
     
   
-    <div class="desc"><p>Search sends a request to the server.</p>
+    <div class="desc"><p>Sends a search request to the server.</p>
 <p>Returns:
-  An Result object whose status attribute is equal to Status.Ok if the request was successful.
-  In this case other attributes of the object have valid data and can be read. Any status other
-  than Status.Ok indicates a failed request. In that case other attributes in the result have
-  unspecified data. Critical errors are reported throwing an exception.</p></div>
+  A SearchResult object whose status attribute is equal to Status.Ok if the request was
+  successful. In this case other attributes of the object have valid data and can be read. Any
+  status other than Status.Ok indicates a failed request. In that case other attributes in the
+  result have unspecified data. Critical errors are reported throwing an exception.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-phrasefinder.search', this);">Show source &equiv;</a></p>
   <div id="source-phrasefinder.search" class="source">
     <pre><code>def search(corpus, query, options=SearchOptions()):
-    """Search sends a request to the server.
+    """Sends a search request to the server.
 
     Returns:
-      An Result object whose status attribute is equal to Status.Ok if the request was successful.
-      In this case other attributes of the object have valid data and can be read. Any status other
-      than Status.Ok indicates a failed request. In that case other attributes in the result have
-      unspecified data. Critical errors are reported throwing an exception.
+      A SearchResult object whose status attribute is equal to Status.Ok if the request was
+      successful. In this case other attributes of the object have valid data and can be read. Any
+      status other than Status.Ok indicates a failed request. In that case other attributes in the
+      result have unspecified data. Critical errors are reported throwing an exception.
     """
     http_response_code_to_status = {
         200: Status.Ok,
