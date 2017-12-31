@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from __future__ import print_function
-import phrasefinder
+import phrasefinder as pf
 
 
 def main():
@@ -10,13 +10,13 @@ def main():
     query = 'I like ???'
 
     # Set the optional parameter topk to 10.
-    options = phrasefinder.SearchOptions()
+    options = pf.SearchOptions()
     options.topk = 10
 
     # Perform a request.
     try:
-        result = phrasefinder.search(query, options)
-        if result.status != phrasefinder.Status.Ok:
+        result = pf.search(pf.Corpus.AmericanEnglish, query, options)
+        if result.status != pf.Status.Ok:
             print('Request was not successful: {}'.format(result.status))
             return
 

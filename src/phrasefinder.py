@@ -76,7 +76,6 @@ class Phrase(object):
 class SearchOptions(object):
     """SearchOptions represents optional parameters that can be sent along with a query."""
     def __init__(self):
-        self.corpus = Corpus.AmericanEnglish
         self.nmin = 1
         self.nmax = 5
         self.topk = 100
@@ -87,7 +86,7 @@ class SearchResult(object):
         self.status = Status.Ok
         self.phrases = []  # List of Phrase instances.
 
-def search(query, options=SearchOptions()):
+def search(corpus, query, options=SearchOptions()):
     """Search sends a request to the server.
 
     Returns:
@@ -102,7 +101,7 @@ def search(query, options=SearchOptions()):
         502: Status.BadGateway
     }
     result = SearchResult()
-    context = urllibx.urlopen(_to_url(query, options))
+    context = urllibx.urlopen(_to_url(corpus, query, options))
     result.status = http_response_code_to_status[context.getcode()]
     if result.status == Status.Ok:
         for line in context.readlines():
@@ -124,7 +123,7 @@ def search(query, options=SearchOptions()):
     context.close()
     return result
 
-def _to_url(query, options):
+def _to_url(corpus, query, options):
     corpus_to_string = {
         Corpus.Null:            "null",
         Corpus.AmericanEnglish: "eng-us",
@@ -137,8 +136,8 @@ def _to_url(query, options):
     }
     params = [
         ("format", "tsv"),
+        ("corpus", corpus_to_string[corpus]),
         ("query", query),
-        ("corpus", corpus_to_string[options.corpus]),
         ("nmin", options.nmin),
         ("nmax", options.nmax),
         ("topk", options.topk)
